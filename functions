@@ -281,13 +281,13 @@ elif [[ $lsb_flag == 2 ]]; then
     bak_sys_pkg() {
         cd ~ && mkdir reins_pkg_bak && cd reins_pkg_bak
         pacman -Qq > installed.pkg
-        cp /etc/pacman/mirrorlist .
+        cp /etc/pacman.d/mirrorlist .
     }
 
     rec_sys_pkg() {
         cd ~/reins_pkg_bak
-        mv /etc/pacman/mirrorlist /etc/pacman/mirrorlist.bak
-        cp mirrorlist /etc/pacman/
+        mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+        cp mirrorlist /etc/pacman.d/
         pacman -Sy - < installed.pkg
     }
 fi
