@@ -253,33 +253,38 @@ case $LSB in
 esac
 
 if [[ $lsb_flag == 1 ]]; then
+    # Do you want to remove profiles remained after uninstalling? :)
     clean_unins_pkg_conf() {
-        # They are the same
-        # dpkg --get-selections | grep uninstall | awk '{print $1}' | xargs aptitude -y purge
         dpkg -l | grep "^rc" | awk '{print $2}' | xargs aptitude -y purge
     }
 
+    # Check which packages installed on your system.
     dump_ins_pkg() {
-        # The lists of installed packages can be used to reinstall the system. :)
-        #dpkg --get-selections | grep install | awk '{print $1}' > installed.pkg
-        dpkg -l | grep "^ii" | awk '{print $2}' > ~/installed.pkg
+        dpkg -l | grep "^ii" | awk '{print $2}' | less
     }
 
+    # Get the package selection, so you can use it on your new system. :)
     bak_sys_pkg() {
         cd ~ && mkdir reins_pkg_bak && cd reins_pkg_bak
-        dpkg --get-selections | grep install | awk '{print $1}' > installed.pkg
+        dpkg --get-selections  > installed.pkg
         cp /etc/apt/sources.list .
+        # you can back up the folder reins_pkg_bak for next using.
     }
 
+    # Use a previous package selection to reinstall packages on new system.
+    # NOTE: Copy the backup folder in /root before run this function as root.
     rec_sys_pkg() {
         cd ~/reins_pkg_bak
         mv /etc/apt/sources.list /etc/apt/sources.list.bak
         cp sources.list /etc/apt/
-        dpkg --get-selections installed.pkg && apt-get dselect-upgrade
+        apt-get update && apt-get upgrade  # upgrade your new system first.
+        # we can sync the packages now
+        dpkg --get-selections < installed.pkg && apt-get dselect-upgrade
     }
 elif [[ $lsb_flag == 2 ]]; then
     bak_sys_pkg() {
         cd ~ && mkdir reins_pkg_bak && cd reins_pkg_bak
+        # list what you installed before
         pacman -Qq > installed.pkg
         cp /etc/pacman.d/mirrorlist .
     }
@@ -288,6 +293,7 @@ elif [[ $lsb_flag == 2 ]]; then
         cd ~/reins_pkg_bak
         mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
         cp mirrorlist /etc/pacman.d/
+        # we can install all the packages easily on Arch.
         pacman -Sy - < installed.pkg
     }
 fi
