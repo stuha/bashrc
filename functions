@@ -10,6 +10,18 @@ function cdf() { # short for `cdfinder`
 	cd "$(osascript -e 'tell app "Finder" to POSIX path of (insertion location as alias)')";
 }
 
+# Smart cd function, allows switching to /etc wh    en running 'cd /etc/fstab'
+function cd()
+{
+    if (( $# == 1 )) && [[ -f ${1} ]]; then
+        [[ ! -e $(dirname $1) ]] && return 1
+        echo "Correcting $1 to $(dirname $1)"
+        builtin cd $(dirname $1) && ls
+    else
+        builtin cd "$@" && ls
+    fi
+}
+
 # Create a .tar.gz archive, using `zopfli`, `pigz` or `gzip` for compression
 function targz() {
 	local tmpFile="${@%/}.tar";
